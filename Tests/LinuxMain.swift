@@ -1,8 +1,6 @@
 import XCTest
+@testable import PredicateTests
 
-import Predicate_swiftTests
-
-var tests = [XCTestCaseEntry]()
-tests += UserPredicateTests.allTests()
-tests += DogPredicateTests.allTests()
-XCTMain(tests)
+XCTMain([
+    testCase(PredicateTests.allTests),
+])

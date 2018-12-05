@@ -1,15 +1,14 @@
 import XCTest
-
 import Predicate
 
-final class UserPredicateTests: XCTestCase {
-    
-    struct User {
-        let name: String
-        let age: Int
-        let weight: Float
-        let isClearToFly: Bool
-    }
+struct User {
+    let name: String
+    let age: Int
+    let weight: Float
+    let isClearToFly: Bool
+}
+
+final class PredicateTests: XCTestCase {
     
     private var allUsers: [User]!
     
@@ -51,14 +50,6 @@ final class UserPredicateTests: XCTestCase {
     func test_filter_floatComparison() {
         XCTAssertEqual(allUsers.filter(\.weight < 85).count, 2) // Bob, Rob
         XCTAssertEqual(allUsers.filter(\.weight <= 82.1).count, 2) // Bob, Rob
-    }
-    
-    func test_filter_regex() {
-        XCTAssertEqual(allUsers.filter(\.name ~= "ob$").count, 2) // Bob, Rob
-    }
-    
-    func test_filter_regexCaseInsensitive() {
-        XCTAssertEqual(allUsers.filter(\.name ~= Regex(pattern: "OB$", options: .caseInsensitive)).count, 2) // Bob, Rob
     }
     
     func test_filter_included_range() {
@@ -107,13 +98,19 @@ final class UserPredicateTests: XCTestCase {
         
     }
     
+    func test_filter_regex() {
+        XCTAssertEqual(allUsers.filter(\.name ~= "ob$").count, 2) // Bob, Rob
+    }
+    
+    func test_filter_regexCaseInsensitive() {
+        XCTAssertEqual(allUsers.filter(\.name ~= Regex(pattern: "OB$", options: .caseInsensitive)).count, 2) // Bob, Rob
+    }
+    
     static var allTests = [
         ("test_filter_string_equal", test_filter_string_equal),
         ("test_filter_string_notEqual", test_filter_string_notEqual),
         ("test_filter_intComparison", test_filter_intComparison),
         ("test_filter_floatComparison", test_filter_floatComparison),
-        ("test_filter_regex", test_filter_regex),
-        ("test_filter_regexCaseInsensitive", test_filter_regexCaseInsensitive),
         ("test_filter_included_range", test_filter_included_range),
         ("test_filter_included_array", test_filter_included_array),
         ("test_filter_float", test_filter_float),
@@ -122,6 +119,8 @@ final class UserPredicateTests: XCTestCase {
         ("test_filter_or", test_filter_or),
         ("test_filter_not", test_filter_not),
         ("test_filter_chain", test_filter_chain),
+        ("test_filter_regex", test_filter_regex),
+        ("test_filter_regexCaseInsensitive", test_filter_regexCaseInsensitive),
     ]
     
 }
