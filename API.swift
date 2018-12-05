@@ -117,5 +117,9 @@ public func ~= <Root>(keyPath: KeyPath<Root, String>, regex: Predicate.Regex) ->
 extension Sequence {
 
     public func filter(_ predicate: Predicate.Predicate<Self.Element>) -> [Self.Element]
+
+    public func prefix(while predicate: Predicate.Predicate<Self.Element>) -> Self.SubSequence
+
+    public func drop(while predicate: Predicate.Predicate<Self.Element>) -> Self.SubSequence
 }
 
