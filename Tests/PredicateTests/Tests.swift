@@ -106,6 +106,26 @@ final class PredicateTests: XCTestCase {
         XCTAssertEqual(allUsers.filter(\.name ~= Regex(pattern: "OB$", options: .caseInsensitive)).count, 2) // Bob, Rob
     }
     
+    func test_prefixWhile() {
+        
+        let result = allUsers.prefix(while: \.weight < 85)
+        
+        XCTAssertEqual(result.count, 2) // Bob, Rob
+        XCTAssertEqual(result[result.startIndex].name, "Bob")
+        XCTAssertEqual(result[result.startIndex + 1].name, "Rob")
+        
+    }
+    
+    func test_dropWhile() {
+        
+        let result = allUsers.drop(while: \.age < 35)
+        
+        XCTAssertEqual(result.count, 2) // Rob, Dan
+        XCTAssertEqual(result[result.startIndex].name, "Rob")
+        XCTAssertEqual(result[result.startIndex + 1].name, "Dan")
+        
+    }
+    
     static var allTests = [
         ("test_filter_string_equal", test_filter_string_equal),
         ("test_filter_string_notEqual", test_filter_string_notEqual),
@@ -121,6 +141,8 @@ final class PredicateTests: XCTestCase {
         ("test_filter_chain", test_filter_chain),
         ("test_filter_regex", test_filter_regex),
         ("test_filter_regexCaseInsensitive", test_filter_regexCaseInsensitive),
+        ("test_prefixWhile", test_prefixWhile),
+        ("test_dropWhile", test_dropWhile)
     ]
     
 }
