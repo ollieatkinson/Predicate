@@ -4,25 +4,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "Predicate.swift",
+    name: "Predicate",
     products: [
-        // Products define the executables and libraries produced by a package, and make them visible to other packages.
-        .library(
-            name: "Predicate.swift",
-            targets: ["Predicate.swift"]),
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .library(name: "Predicate", targets: ["Predicate"]),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
-        .target(
-            name: "Predicate.swift",
-            dependencies: []),
-        .testTarget(
-            name: "Predicate.swiftTests",
-            dependencies: ["Predicate.swift"]),
+        .target(name: "Predicate", dependencies: []),
+        .testTarget(name: "PredicateTests", dependencies: [ "Predicate" ]),
     ]
 )

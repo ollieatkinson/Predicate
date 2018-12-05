@@ -3,5 +3,6 @@ import XCTest
 import Predicate_swiftTests
 
 var tests = [XCTestCaseEntry]()
-tests += Predicate_swiftTests.allTests()
+tests += UserPredicateTests.allTests()
+tests += DogPredicateTests.allTests()
 XCTMain(tests)
