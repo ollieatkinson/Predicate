@@ -140,6 +140,7 @@ final class PredicateTests: XCTestCase {
         ("test_filter_not", test_filter_not),
         ("test_filter_chain", test_filter_chain),
         ("test_filter_regex", test_filter_regex),
+        ("test_filter_usingKeyPathPartialPredicate", test_filter_usingKeyPathPartialPredicate),
         ("test_filter_regexCaseInsensitive", test_filter_regexCaseInsensitive),
         ("test_prefixWhile", test_prefixWhile),
         ("test_dropWhile", test_dropWhile)
