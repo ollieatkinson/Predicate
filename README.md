@@ -12,3 +12,11 @@ Predicate composition for filtering operators (eg. `filter`, `prefix(while:)` or
 ```swift
 users.filter(\.age > 30)
 ```
+
+# Installation
+
+## SwiftPM:
+
+```swift
+package.append(.package(url: "https://github.com/ollieatkinson/Predicate.swift", from: "0.1.0"))
+```
