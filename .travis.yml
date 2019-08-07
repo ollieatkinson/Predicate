@@ -9,8 +9,8 @@ notifications:
 
 env:
   global:
-    - SWIFT_BRANCH=swift-4.2-branch
-    - SWIFT_VERSION=swift-4.2-DEVELOPMENT-SNAPSHOT-2018-10-30-a
+    - SWIFT_BRANCH=swift-5.1-branch
+    - SWIFT_VERSION=swift-5.1-DEVELOPMENT-SNAPSHOT-2019-07-25-a
 
 matrix:
   include:
