@@ -118,12 +118,51 @@ final class PredicateTests: XCTestCase {
     
     func test_dropWhile() {
         
-        let result = allUsers.drop(while: \.age < 35)
+        let result = Array(allUsers.drop(while: \.age < 35))
         
         XCTAssertEqual(result.count, 2) // Rob, Dan
         XCTAssertEqual(result[result.startIndex].name, "Rob")
         XCTAssertEqual(result[result.startIndex + 1].name, "Dan")
         
+    }
+
+    func test_first() {
+
+        let result = allUsers.first(where: \.isClearToFly == false) // Rob, Dan
+
+        XCTAssertEqual(result?.name, "Rob") // Rob
+    }
+
+    func test_contains_true() {
+
+        let result = allUsers.contains(where: \.weight < 85)
+
+        XCTAssertTrue(result)
+
+    }
+
+    func test_contains_false() {
+
+        let result = allUsers.contains(where: \.weight > 185)
+
+        XCTAssertFalse(result)
+
+    }
+
+    func test_allSatisfy_true() {
+
+        let result = allUsers.allSatisfy(\.age > 20)
+
+        XCTAssertTrue(result)
+
+    }
+
+    func test_allSatisfy_false() {
+
+        let result = allUsers.allSatisfy(\.age > 35)
+
+        XCTAssertFalse(result)
+
     }
     
     static var allTests = [
@@ -143,7 +182,12 @@ final class PredicateTests: XCTestCase {
         ("test_filter_usingKeyPathPartialPredicate", test_filter_usingKeyPathPartialPredicate),
         ("test_filter_regexCaseInsensitive", test_filter_regexCaseInsensitive),
         ("test_prefixWhile", test_prefixWhile),
-        ("test_dropWhile", test_dropWhile)
+        ("test_dropWhile", test_dropWhile),
+        ("test_first", test_first),
+        ("test_contains_true", test_contains_true),
+        ("test_contains_false", test_contains_false),
+        ("test_allSatisfy_true", test_allSatisfy_true),
+        ("test_allSatisfy_false", test_allSatisfy_false),
     ]
     
 }
