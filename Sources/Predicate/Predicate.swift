@@ -1,9 +1,5 @@
 import Foundation
 
-public prefix func ! <Root>(keyPath: KeyPath<Root, Bool>) -> (Root) -> Bool {
-    return { !$0[keyPath: keyPath] }
-}
-
 public func == <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Equatable {
     return { block($0) == value }
 }

@@ -7,14 +7,14 @@
 ![macOS](https://img.shields.io/badge/os-macOS-lightgrey.svg?style=flat)
 [![Licence](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat)](LICENCE)
 
-Predicate composition for filtering operators (eg. `filter`, `prefix(while:)` or `drop(while:)`).
+Predicate Composition
 
 ## API
 
 ### Equals
 ```swift
-public func == <Root, Value>(keyPath: KeyPath<Root, Value>, value: Value) -> Predicate<Root> where Value : Equatable
-public func != <Root, Value>(keyPath: KeyPath<Root, Value>, value: Value) -> Predicate<Root> where Value : Equatable
+public func == <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value : Equatable
+public func != <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value : Equatable
 ```
 
 #### Example
@@ -25,10 +25,10 @@ users.filter(\.name != "Ste")
 
 ### Less Than & More Than
 ```swift
-public func < <Root, Value>(keyPath: KeyPath<Root, Value>, value: Value) -> Predicate<Root> where Value : Comparable
-public func <= <Root, Value>(keyPath: KeyPath<Root, Value>, value: Value) -> Predicate<Root> where Value : Comparable
-public func > <Root, Value>(keyPath: KeyPath<Root, Value>, value: Value) -> Predicate<Root> where Value : Comparable
-public func >= <Root, Value>(keyPath: KeyPath<Root, Value>, value: Value) -> Predicate<Root> where Value : Comparable
+public func < <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value : Comparable
+public func > <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value : Comparable
+public func <= <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value : Comparable
+public func >= <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value : Comparable
 ```
 
 #### Example
@@ -40,11 +40,10 @@ users.filter(\.age <= 55)
 ### Similar to
 
 ```swift
-public func << <Root>(keyPath: KeyPath<Root, Int>, value: ClosedRange<Int>) -> Predicate<Root>
-public func << <Root, Value>(keyPath: KeyPath<Root, Value>, value: [Value]) -> Predicate<Root> where Value : Equatable
-public func ~= <Root>(keyPath: KeyPath<Root, String>, regex: Regex) -> Predicate<Root>
-public func == <Root, Value>(keyPath: KeyPath<Root, Value>, value: ClosedRange<Value>) -> Predicate<Root> where Value : FloatingPoint
-public func ± <T>(number: T, accuracy: T) -> ClosedRange<T> where T : FloatingPoint
+public func << <Root, S>(block: @escaping (Root) -> S.Element, value: S) -> (Root) -> Bool where S : Sequence, S.Element : Equatable
+public func ~= <Root>(block: @escaping (Root) -> String, regex: Regex) -> (Root) -> Bool
+public func == <Root, Value>(block: @escaping (Root) -> Value, value: (Value, Value)) -> (Root) -> Bool where Value : FloatingPoint
+public func ± <Value>(number: Value, accuracy: Value) -> (Value, Value) where Value : FloatingPoint
 ```
 
 #### Example
@@ -56,17 +55,14 @@ users.filter(\.weight == 85 ± 4 //Weight is equal to 85, plus or minus 4, usefu
 
 ### Boolean Logic
 
-Combine any of the previous logic together to compose more complex predicates
-
 ```swift
-public func && <T>(lhs: Predicate<T>, rhs: Predicate<T>) -> CompoundPredicate<T>
-public func && <T>(lhs: Predicate<T>, rhs: @autoclosure @escaping () -> Bool) -> CompoundPredicate<T>
-public func && <T>(lhs: @autoclosure @escaping () -> Bool, rhs: Predicate<T>) -> CompoundPredicate<T>
-public func || <T>(lhs: Predicate<T>, rhs: Predicate<T>) -> CompoundPredicate<T>
-public func || <T>(lhs: Predicate<T>, rhs: @autoclosure @escaping () -> Bool) -> CompoundPredicate<T>
-public func || <T>(lhs: @autoclosure @escaping () -> Bool, rhs: Predicate<T>) -> CompoundPredicate<T>
-public prefix func ! <T>(predicate: Predicate<T>) -> Predicate<T>
-public prefix func ! <Root>(keyPath: KeyPath<Root, Bool>) -> Predicate<Root>
+public prefix func ! <Root>(block: @escaping (Root) -> Bool) -> (Root) -> Bool
+public func && <Root>(lhs: @autoclosure @escaping () -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool
+public func || <Root>(lhs: @autoclosure @escaping () -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool
+public func && <Root>(lhs: @escaping (Root) -> Bool, rhs: @autoclosure @escaping () -> Bool) -> (Root) -> Bool
+public func || <Root>(lhs: @escaping (Root) -> Bool, rhs: @autoclosure @escaping () -> Bool) -> (Root) -> Bool
+public func && <Root>(lhs: @escaping (Root) -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool
+public func || <Root>(lhs: @escaping (Root) -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool
 ```
 
 #### Example
@@ -74,19 +70,6 @@ public prefix func ! <Root>(keyPath: KeyPath<Root, Bool>) -> Predicate<Root>
 ```swift
 users.filter(\.isClearToFly && \.name == "Noah")
 users.filter(\.age > 30 && \.name != "Noah")
-```
-
-### Sequences
-
-```swift
-extension Sequence {
-    public func filter(_ predicate: Predicate<Element>) -> [Element]
-    public func prefix(while predicate: Predicate<Element>) -> [Element]
-    public func drop(while predicate: Predicate<Element>) -> DropWhileSequence<Self>
-    public func first(where predicate: Predicate<Element>) -> Element?
-    public func contains(where predicate: Predicate<Element>) -> Bool
-    public func allSatisfy(_ predicate: Predicate<Element>) -> Bool
-}
 ```
 
 # Installation
