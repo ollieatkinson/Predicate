@@ -1,193 +1,143 @@
 import XCTest
 import Predicate
 
-struct User {
+struct User: Hashable {
     let name: String
     let age: Int
     let weight: Float
     let isClearToFly: Bool
 }
 
+extension Sequence where Element: Hashable {
+    var set: Set<Element> { .init(self) }
+}
+
 final class PredicateTests: XCTestCase {
     
-    private var allUsers: [User]!
+    private var sut: [User]!
     
     override func setUp() {
         super.setUp()
         
-        let bob = User(name: "Bob", age: 32, weight: 78.2, isClearToFly: true)
-        let rob = User(name: "Rob", age: 38, weight: 82.1, isClearToFly: false)
-        let dan = User(name: "Dan", age: 36, weight: 85.8, isClearToFly: false)
+        let Milos = User(name: "Milos", age: 32, weight: 78.2, isClearToFly: true)
+        let Noah = User(name: "Noah", age: 38, weight: 82.1, isClearToFly: false)
+        let Ste = User(name: "Ste", age: 36, weight: 85.8, isClearToFly: false)
         
-        allUsers = [ bob, rob, dan ]
+        sut = [ Milos, Noah, Ste ]
         
+    }
+    
+    public func XCTAssertUsersEqual<S>(
+        _ expression1: @autoclosure () throws -> S,
+        _ expression2: String...,
+        message: @autoclosure () -> String = "",
+        file: StaticString = #file,
+        line: UInt = #line
+    ) rethrows where S: Sequence, S.Element == User {
+        try XCTAssertUsersEqual(try expression1(), Array(expression2), message(), file: file, line: line)
+    }
+    
+    public func XCTAssertUsersEqual<S>(
+        _ expression1: @autoclosure () throws -> S,
+        _ expression2: @autoclosure () throws -> [String],
+        _ message: @autoclosure () -> String = "",
+        file: StaticString = #file,
+        line: UInt = #line
+    ) rethrows where S: Sequence, S.Element == User {
+        XCTAssertEqual(try expression1().map(\.name), Array(try expression2()), message(), file: file, line: line)
     }
     
     func test_filter_string_equal() {
-        
-        let result = allUsers.filter(\.name == "Bob")
-        
-        XCTAssertEqual(result.count, 1) // Bob
-        XCTAssertEqual(result[0].name, "Bob") // Bob
+        XCTAssertUsersEqual(sut.filter(\.name == "Milos"), "Milos")
     }
     
     func test_filter_string_notEqual() {
-        
-        let result = allUsers.filter(\.name != "Bob")
-        
-        XCTAssertEqual(result.count, 2) // Rob, Dan
-        
-        XCTAssertEqual(result[0].name, "Rob") // Rob
-        XCTAssertEqual(result[1].name, "Dan") // Dan
-        
+        XCTAssertUsersEqual(sut.filter(\.name != "Milos"), "Noah", "Ste")
     }
     
     func test_filter_intComparison() {
-        XCTAssertEqual(allUsers.filter(\.age > 33).count, 2) // Rob, Dan
-        XCTAssertEqual(allUsers.filter(\.age >= 36).count, 2) // Rob, Dan
+        XCTAssertUsersEqual(sut.filter(\.age > 33), "Noah", "Ste")
+        XCTAssertUsersEqual(sut.filter(\.age >= 36), "Noah", "Ste")
     }
     
     func test_filter_floatComparison() {
-        XCTAssertEqual(allUsers.filter(\.weight < 85).count, 2) // Bob, Rob
-        XCTAssertEqual(allUsers.filter(\.weight <= 82.1).count, 2) // Bob, Rob
+        XCTAssertUsersEqual(sut.filter(\.weight < 85), "Milos", "Noah")
+        XCTAssertUsersEqual(sut.filter(\.weight <= 82.1), "Milos", "Noah")
+    }
+    
+    func test_filter_float_equals_with_accuracy() {
+        XCTAssertUsersEqual(sut.filter(\.weight == 85 ± 4), "Noah", "Ste")
+        XCTAssertUsersEqual(sut.filter(\.weight == 82.1 ± 3), "Noah")
     }
     
     func test_filter_included_range() {
-        XCTAssertEqual(allUsers.filter(\.age << (30...35)).count, 1) // Bob
+        XCTAssertUsersEqual(sut.filter(\.age << (30...35)), "Milos")
     }
     
     func test_filter_included_array() {
-        XCTAssertEqual(allUsers.filter(\.age << [ 30, 32, 34 ]).count, 1) // Bob
+        XCTAssertUsersEqual(sut.filter(\.age << [ 30, 32, 34 ]), "Milos")
     }
     
     func test_filter_float() {
-        XCTAssertEqual(allUsers.filter(\.weight == 78.2).count, 1) // Bob
+        XCTAssertUsersEqual(sut.filter(\.weight == 78.2), "Milos")
     }
     
     func test_filter_boolean() {
-        XCTAssertEqual(allUsers.filter(\.isClearToFly == false).count, 2) // Rob, Dan
+        XCTAssertUsersEqual(sut.filter(\.isClearToFly == false), [ "Noah", "Ste" ])
+        XCTAssertUsersEqual(sut.filter(\.isClearToFly), [ "Milos" ])
+        XCTAssertUsersEqual(sut.filter(!\.isClearToFly), [ "Noah", "Ste" ])
     }
     
     func test_filter_and() {
-        XCTAssertEqual(allUsers.filter(\.isClearToFly == false && \.name == "Rob").count, 1) // Rob
+        XCTAssertUsersEqual(sut.filter(!\.isClearToFly && \.name == "Noah"), "Noah")
     }
     
     func test_filter_or() {
-        XCTAssertEqual(allUsers.filter(\.isClearToFly == false || \.name == "Bob").count, 3) // Bob, Rob, Dan
+        XCTAssertUsersEqual(sut.filter(!\.isClearToFly || \.name == "Milos"), "Milos", "Noah", "Ste")
     }
     
     func test_filter_not() {
-        
-        let isUserClearToFlyPredicate = \User.isClearToFly == true
-        
-        XCTAssertEqual(allUsers.filter(isUserClearToFlyPredicate.not).count, 2) // Rob, Dan
-        XCTAssertEqual(allUsers.filter(!isUserClearToFlyPredicate).count, 2) // Rob, Dan
-        
+        XCTAssertUsersEqual(sut.filter(!\.isClearToFly), "Noah", "Ste")
     }
     
     func test_filter_chain() {
-        XCTAssertEqual(allUsers.filter(\.isClearToFly == false).filter(\.name == "Rob").count, 1) // Rob
+        XCTAssertUsersEqual(sut.filter(!\.isClearToFly).filter(\.name == "Noah"), "Noah")
     }
-    
-    func test_filter_usingKeyPathPartialPredicate() {
-        
-        let partialPredicate = KeyPathPartialPredicate(keyPath: \User.name)
-        let predicate = partialPredicate.equal(value: "Bob")
-        
-        XCTAssertEqual(allUsers.filter(predicate).count, 1) // Bob
-        
-    }
-    
+
     func test_filter_regex() {
-        XCTAssertEqual(allUsers.filter(\.name ~= "ob$").count, 2) // Bob, Rob
+        XCTAssertUsersEqual(sut.filter(\.name ~= "o(s|ah)$"), "Milos", "Noah")
     }
     
     func test_filter_regexCaseInsensitive() {
-        XCTAssertEqual(allUsers.filter(\.name ~= Regex(pattern: "OB$", options: .caseInsensitive)).count, 2) // Bob, Rob
+        XCTAssertUsersEqual(sut.filter(\.name ~= Regex(pattern: "O(S|AH)$", options: .caseInsensitive)), "Milos", "Noah")
     }
     
     func test_prefixWhile() {
-        
-        let result = allUsers.prefix(while: \.weight < 85)
-        
-        XCTAssertEqual(result.count, 2) // Bob, Rob
-        XCTAssertEqual(result[result.startIndex].name, "Bob")
-        XCTAssertEqual(result[result.startIndex + 1].name, "Rob")
-        
+        XCTAssertUsersEqual(sut.prefix(while: \.weight < 85), "Milos", "Noah")
     }
     
     func test_dropWhile() {
-        
-        let result = Array(allUsers.drop(while: \.age < 35))
-        
-        XCTAssertEqual(result.count, 2) // Rob, Dan
-        XCTAssertEqual(result[result.startIndex].name, "Rob")
-        XCTAssertEqual(result[result.startIndex + 1].name, "Dan")
-        
+        XCTAssertUsersEqual(sut.drop(while: \.age < 35), "Noah", "Ste")
     }
 
     func test_first() {
-
-        let result = allUsers.first(where: \.isClearToFly == false) // Rob, Dan
-
-        XCTAssertEqual(result?.name, "Rob") // Rob
+        XCTAssertEqual(sut.first(where: !\.isClearToFly)?.name, "Noah")
     }
 
     func test_contains_true() {
-
-        let result = allUsers.contains(where: \.weight < 85)
-
-        XCTAssertTrue(result)
-
+        XCTAssertTrue(sut.contains(where: \.weight < 85))
     }
 
     func test_contains_false() {
-
-        let result = allUsers.contains(where: \.weight > 185)
-
-        XCTAssertFalse(result)
-
+        XCTAssertFalse(sut.contains(where: \.weight > 185))
     }
 
     func test_allSatisfy_true() {
-
-        let result = allUsers.allSatisfy(\.age > 20)
-
-        XCTAssertTrue(result)
-
+        XCTAssertTrue(sut.allSatisfy(\.age > 20))
     }
 
     func test_allSatisfy_false() {
-
-        let result = allUsers.allSatisfy(\.age > 35)
-
-        XCTAssertFalse(result)
-
+        XCTAssertFalse(sut.allSatisfy(\.age > 35))
     }
-    
-    static var allTests = [
-        ("test_filter_string_equal", test_filter_string_equal),
-        ("test_filter_string_notEqual", test_filter_string_notEqual),
-        ("test_filter_intComparison", test_filter_intComparison),
-        ("test_filter_floatComparison", test_filter_floatComparison),
-        ("test_filter_included_range", test_filter_included_range),
-        ("test_filter_included_array", test_filter_included_array),
-        ("test_filter_float", test_filter_float),
-        ("test_filter_boolean", test_filter_boolean),
-        ("test_filter_and", test_filter_and),
-        ("test_filter_or", test_filter_or),
-        ("test_filter_not", test_filter_not),
-        ("test_filter_chain", test_filter_chain),
-        ("test_filter_regex", test_filter_regex),
-        ("test_filter_usingKeyPathPartialPredicate", test_filter_usingKeyPathPartialPredicate),
-        ("test_filter_regexCaseInsensitive", test_filter_regexCaseInsensitive),
-        ("test_prefixWhile", test_prefixWhile),
-        ("test_dropWhile", test_dropWhile),
-        ("test_first", test_first),
-        ("test_contains_true", test_contains_true),
-        ("test_contains_false", test_contains_false),
-        ("test_allSatisfy_true", test_allSatisfy_true),
-        ("test_allSatisfy_false", test_allSatisfy_false),
-    ]
     
 }
