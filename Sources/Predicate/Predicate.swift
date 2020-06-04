@@ -1,63 +1,103 @@
-internal typealias LogicalComparison<Value> = (Value, Value) -> Bool
+import Foundation
 
-public struct Predicate<Object> {
-    
-    private let evaluateBlock: EvaluateBlock
-    
-    internal init(value: Bool) {
-        self.evaluateBlock = { _ in value }
-    }
-    
-    internal init(value: @escaping () -> Bool) {
-        self.evaluateBlock = { _ in value() }
-    }
-    
-    internal init<Value>(keyPath: KeyPath<Object, Value>, value: Value, _ logicalComparison: @escaping LogicalComparison<Value>) {
-        self.evaluateBlock = { object in logicalComparison(object[keyPath: keyPath], value) }
-    }
-    
-    public func evaluate(with object: Object) -> Bool {
-        return evaluateBlock(object)
-    }
-    
+public func == <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Equatable {
+    return { block($0) == value }
 }
 
-extension Predicate: ExpressibleByBooleanLiteral {
-    
-    public init(booleanLiteral value: Bool) {
-        self.init(value: value)
-    }
-    
+public func != <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Equatable {
+    return { block($0) != value }
 }
 
-extension Predicate {
-    
-    internal typealias EvaluateBlock = (_ object: Object) -> Bool
-    
-    internal init(evaluate: @escaping EvaluateBlock) {
-        self.evaluateBlock = evaluate
-    }
-    
+public func < <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Comparable {
+    return { block($0) < value }
 }
 
-extension Predicate {
-    
-    public var not: Predicate {
-        return Predicate(evaluate: { object in !self.evaluate(with: object) })
-    }
-    
+public func > <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Comparable {
+    return { block($0) > value }
 }
 
-public typealias CompoundPredicate<Object> = Predicate<Object>
+public func <= <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Comparable {
+    return { block($0) <= value }
+}
 
-extension CompoundPredicate {
-    
-    public func and(_ other: Predicate<Object>) -> Predicate<Object> {
-        return CompoundPredicate(evaluate: { self.evaluate(with: $0) && other.evaluate(with: $0) })
+public func >= <Root, Value>(block: @escaping (Root) -> Value, value: Value) -> (Root) -> Bool where Value: Comparable {
+    return { block($0) >= value }
+}
+
+public prefix func ! <Root>(block: @escaping (Root) -> Bool) -> (Root) -> Bool {
+    return { !block($0) }
+}
+
+public func && <Root>(lhs: @escaping @autoclosure () -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool {
+    return { lhs() && rhs($0) }
+}
+
+public func || <Root>(lhs: @escaping @autoclosure () -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool {
+    return { lhs() || rhs($0) }
+}
+
+public func && <Root>(lhs: @escaping (Root) -> Bool, rhs: @escaping @autoclosure () -> Bool) -> (Root) -> Bool {
+    return { lhs($0) && rhs() }
+}
+
+public func || <Root>(lhs: @escaping (Root) -> Bool, rhs: @escaping @autoclosure () -> Bool) -> (Root) -> Bool {
+    return { lhs($0) || rhs() }
+}
+
+public func && <Root>(lhs: @escaping (Root) -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool {
+    return { lhs($0) && rhs($0) }
+}
+
+public func || <Root>(lhs: @escaping (Root) -> Bool, rhs: @escaping (Root) -> Bool) -> (Root) -> Bool {
+    return { lhs($0) || rhs($0) }
+}
+
+// MARK:- Sequence
+
+public func << <Root, S>(block: @escaping (Root) -> S.Element, value: S) -> (Root) -> Bool where S: Sequence, S.Element: Equatable {
+    return { value.contains(block($0)) }
+}
+
+// MARK:- Regex
+
+public func ~= <Root>(block: @escaping (Root) -> String, regex: Regex) -> (Root) -> Bool {
+    return { block($0).range(of: regex.pattern, options: regex.options) != nil }
+}
+
+public struct Regex {
+
+    public let pattern: String
+    public let options: NSString.CompareOptions
+
+    public init(pattern: String, options: NSString.CompareOptions) {
+        self.pattern = pattern
+        self.options = options.union(.regularExpression)
     }
-    
-    public func or(_ other: Predicate<Object>) -> Predicate<Object> {
-        return CompoundPredicate(evaluate: { self.evaluate(with: $0) || other.evaluate(with: $0) })
+
+}
+
+extension Regex: ExpressibleByStringLiteral {
+
+    public init(stringLiteral value: String) {
+        self.init(pattern: value, options: .regularExpression)
     }
-    
+
+    public init(unicodeScalarLiteral value: String) {
+        self.init(pattern: value, options: .regularExpression)
+    }
+
+    public init(extendedGraphemeClusterLiteral value: String) {
+        self.init(pattern: value, options: .regularExpression)
+    }
+
+}
+
+public func == <Root, Value>(block: @escaping (Root) -> Value, value: (Value, Value)) -> (Root) -> Bool where Value: FloatingPoint {
+    return { abs(block($0) - value.0) < value.1 }
+}
+
+infix operator ± : NilCoalescingPrecedence
+
+public func ± <Value>(number: Value, accuracy: Value) -> (Value, Value) where Value: FloatingPoint {
+    return (number, accuracy)
 }
