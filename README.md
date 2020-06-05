@@ -47,10 +47,16 @@ public func ± <Value>(number: Value, accuracy: Value) -> (Value, Value) where V
 ```
 
 #### Example
+
+- `<<` sequence contains
+- `±` comparing floating point numbers to a degree of accuracy
+- `~=` Regex
+
 ```swift
-users.filter(\.age << 30...35) // Age is within the range 30-35
-users.filter(\.age << [ 30, 32, 34 ]) // Age is one of 30, 32 or 34
-users.filter(\.weight == 85 ± 4 //Weight is equal to 85, plus or minus 4, useful for comparing floating points where accuracy is not important
+users.filter(\.age << 30...35)
+users.filter(\.age << [ 30, 32, 34 ])
+users.filter(\.weight == 85 ± 4
+users.filter(\.name ~= "o(s|ah)$")
 ```
 
 ### Boolean Logic
