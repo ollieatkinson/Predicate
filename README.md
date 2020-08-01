@@ -1,4 +1,4 @@
-# Predicate.swift
+# Predicate
 
 [![Swift 5.2](https://img.shields.io/badge/swift-5.2-ED523F.svg?style=flat)](https://swift.org/download/) 
 [![SPM](https://img.shields.io/badge/swift-SPM-ED523F.svg?style=flat)](https://swift.org/package-manager/)
@@ -82,5 +82,5 @@ users.filter(\.age > 30 && \.name != "Noah")
 ## SwiftPM:
 
 ```swift
-package.append(.package(url: "https://github.com/ollieatkinson/Predicate.swift", from: "1.0.0"))
+package.append(.package(url: "https://github.com/ollieatkinson/Predicate", from: "1.0.0"))
 ```
