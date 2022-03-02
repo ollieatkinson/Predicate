@@ -54,7 +54,7 @@ public func ± <Value>(number: Value, accuracy: Value) -> (Value, Value) where V
 ```swift
 users.filter(\.age << 30...35)
 users.filter(\.age << [ 30, 32, 34 ])
-users.filter(\.weight == 85 ± 4
+users.filter(\.weight == 85 ± 4)
 users.filter(\.name ~= "o(s|ah)$")
 ```
 
